@@ -1,12 +1,9 @@
-// Конфигурация Vite.
-// base: './' — относительные пути, чтобы проект корректно работал на GitHub Pages.
-// Экспортируем обычный объект без импорта defineConfig,
-// чтобы сборка не требовала установленного локально пакета vite.
-const config = {
+import { defineConfig } from 'vite';
+
+export default defineConfig({
   server: {
+    host: '127.0.0.1',
     open: true,
   },
   base: './',
-};
-
-export default config;
+});

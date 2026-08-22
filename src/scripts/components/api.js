@@ -1,5 +1,3 @@
-
-
 const config = {
   baseUrl: "https://mesto.nomoreparties.co/v1/apf-cohort-203",
   headers: {
@@ -8,19 +6,16 @@ const config = {
   },
 };
 
-// Общая проверка ответа сервера
 const getResponseData = (res) => {
   return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
 };
 
-// Получить данные пользователя
 export const getUserInfo = () => {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers,
   }).then(getResponseData);
 };
 
-// Обновить данные пользователя (имя и описание)
 export const setUserInfo = ({ name, about }) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
@@ -29,7 +24,6 @@ export const setUserInfo = ({ name, about }) => {
   }).then(getResponseData);
 };
 
-// Обновить аватар пользователя
 export const setUserAvatar = (avatar) => {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: "PATCH",
@@ -38,15 +32,13 @@ export const setUserAvatar = (avatar) => {
   }).then(getResponseData);
 };
 
-// Получить список всех карточек
 export const getCardList = () => {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
   }).then(getResponseData);
 };
 
-// Создать новую карточку
-export const postNewCard = ({ name, link }) => {
+export const addNewCard = ({ name, link }) => {
   return fetch(`${config.baseUrl}/cards`, {
     method: "POST",
     headers: config.headers,
@@ -54,17 +46,15 @@ export const postNewCard = ({ name, link }) => {
   }).then(getResponseData);
 };
 
-// Удалить карточку по её ID
-export const deleteCardRequest = (cardID) => {
-  return fetch(`${config.baseUrl}/cards/${cardID}`, {
+export const removeCard = (cardId) => {
+  return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: "DELETE",
     headers: config.headers,
   }).then(getResponseData);
 };
 
-// Поставить или снять лайк (isLiked = true -> DELETE, false -> PUT)
-export const changeLikeCardStatus = (cardID, isLiked) => {
-  return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
+export const changeLikeCardStatus = (cardId, isLiked) => {
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: isLiked ? "DELETE" : "PUT",
     headers: config.headers,
   }).then(getResponseData);
