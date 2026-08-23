@@ -35,4 +35,4 @@ npm run build  # production-сборка в папку dist
 (`.github/workflows/deploy.yml`): при пуше в `main` проект собирается и результат
 публикуется в отдельный публичный репозиторий Pages.
 
-https://ivancot.github.io/mesto-ad/
+https://ivancot.github.io/mesto-deploy/
