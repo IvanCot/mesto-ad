@@ -17,6 +17,18 @@ import {
   closeModalWindow,
   setCloseModalWindowEventListeners,
 } from "./components/modal.js";
+import { enableValidation, clearValidation } from "./components/validation.js";
+
+// Конфигурация валидации: селекторы и классы вынесены сюда,
+// чтобы validation.js не зависел от разметки
+const validationSettings = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
 
 // DOM elements
 const placesWrap = document.querySelector(".places__list");
@@ -253,18 +265,24 @@ const openCardFormButton = document.querySelector(".profile__add-button");
 openProfileFormButton.addEventListener("click", () => {
   profileTitleInput.value = profileTitle.textContent;
   profileDescriptionInput.value = profileDescription.textContent;
+  clearValidation(profileForm, validationSettings);
   openModalWindow(profileFormModalWindow);
 });
 
 profileAvatar.addEventListener("click", () => {
   avatarForm.reset();
+  clearValidation(avatarForm, validationSettings);
   openModalWindow(avatarFormModalWindow);
 });
 
 openCardFormButton.addEventListener("click", () => {
   cardForm.reset();
+  clearValidation(cardForm, validationSettings);
   openModalWindow(cardFormModalWindow);
 });
+
+// Включаем валидацию всех форм на странице
+enableValidation(validationSettings);
 
 // Initial load: user + cards together
 Promise.all([getCardList(), getUserInfo()])

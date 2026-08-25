@@ -34,5 +34,3 @@ npm run build  # production-сборка в папку dist
 Сборка выкладывается на GitHub Pages автоматически через GitHub Actions
 (`.github/workflows/deploy.yml`): при пуше в `main` проект собирается и результат
 публикуется в отдельный публичный репозиторий Pages.
-
-https://ivancot.github.io/mesto-deploy/
