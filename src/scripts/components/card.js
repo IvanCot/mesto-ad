@@ -13,12 +13,13 @@ export const deleteCard = (cardElement) => {
 export const updateLikeState = (likeButton, cardElement, likes, userId) => {
   likeButton.classList.toggle(
     "card__like-button_is-active",
-    isLikedByMe(likes, userId)
+    hasUserLike(likes, userId)
   );
   cardElement.querySelector(".card__like-count").textContent = likes.length;
 };
 
-const isLikedByMe = (likes, userId) => {
+// Определяет наличие лайка пользователя в данных карточки
+export const hasUserLike = (likes, userId) => {
   return likes.some((user) => user._id === userId);
 };
 
@@ -37,8 +38,7 @@ export const createCardElement = (
   cardElement.querySelector(".card__title").textContent = data.name;
   cardElement.querySelector(".card__like-count").textContent = data.likes.length;
 
-  if (isLikedByMe(data.likes, currentUserId)) {
-    likeButton.classList.add("card__like-button_is-active");
+  if (hasUserLike(data.likes, currentUserId)) {    likeButton.classList.add("card__like-button_is-active");
   }
 
   if (data.owner._id !== currentUserId && onDeleteCard) {

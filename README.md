@@ -1,5 +1,7 @@
 # Mesto. Работа с сервером
 
+[Проект на GitHub Pages](https://ivancot.github.io/mesto-deploy/)
+
 Проектная работа курса Яндекс Практикума «Веб-разработка»: интерактивная страница Mesto,
 подключённая к учебному API `nomoreparties.co`.
 
@@ -27,6 +29,7 @@
 npm install    # установка зависимостей
 npm run dev    # запуск dev-сервера
 npm run build  # production-сборка в папку dist
+npm run deploy # публикация папки dist на GitHub Pages
 ```
 
 ## Деплой
@@ -35,4 +38,5 @@ npm run build  # production-сборка в папку dist
 (`.github/workflows/deploy.yml`): при пуше в `main` проект собирается и результат
 публикуется в отдельный публичный репозиторий Pages.
 
-https://ivancot.github.io/mesto-deploy/
+Локальная публикация также доступна командой `npm run deploy` (пакет `gh-pages`
+публикует папку `dist` в ветку `gh-pages` репозитория).

@@ -11,6 +11,7 @@ import {
   createCardElement,
   deleteCard,
   updateLikeState,
+  hasUserLike,
 } from "./components/card.js";
 import {
   openModalWindow,
@@ -111,11 +112,10 @@ const handlePreviewPicture = ({ name, link }) => {
 };
 
 const handleLikeIcon = (likeButton, cardElement, cardData) => {
-  const isLiked = likeButton.classList.contains(
-    "card__like-button_is-active"
-  );
+  const isLiked = hasUserLike(cardData.likes, currentUserId);
   changeLikeCardStatus(cardData._id, isLiked)
     .then((updatedCard) => {
+      cardData.likes = updatedCard.likes;
       updateLikeState(
         likeButton,
         cardElement,
@@ -137,15 +137,13 @@ const handleInfoClick = (cardId) => {
   getCardList()
     .then((cards) => {
       const cardData = cards.find((card) => card._id === cardId);
-      cardInfoTitle.textContent = cardData.name;
+      cardInfoTitle.textContent = "Информация о карточке";
       cardInfoModalInfoList.innerHTML = "";
       cardInfoModalInfoList.append(
+        createInfoString("Описание:", cardData.name),
         createInfoString("Дата создания:", formatDate(new Date(cardData.createdAt))),
-        createInfoString(
-          "Количество лайков:",
-          String(cardData.likes.length)
-        ),
-        createInfoString("Всего комментариев:", "0")
+        createInfoString("Владелец:", cardData.owner.name),
+        createInfoString("Количество лайков:", String(cardData.likes.length))
       );
       cardInfoUsersList.innerHTML = "";
       if (cardData.likes.length === 0) {
@@ -163,15 +161,10 @@ const handleInfoClick = (cardId) => {
     });
 };
 
-const renderLoading = (button, isLoading, initialText) => {
-  button.textContent = isLoading ? (initialText === "Создать" ? "Создание..." : "Сохранение...") : initialText;
-  button.disabled = isLoading;
-};
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-  const initialText = profileSubmitButton.textContent;
-  renderLoading(profileSubmitButton, true, initialText);
+  setSubmittingStatus(profileForm, profileSubmitButton, true);
   setUserInfo({
     name: profileTitleInput.value,
     about: profileDescriptionInput.value,
@@ -185,14 +178,13 @@ const handleProfileFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      renderLoading(profileSubmitButton, false, initialText);
+      setSubmittingStatus(profileForm, profileSubmitButton, false);
     });
 };
 
 const handleAvatarFormSubmit = (evt) => {
   evt.preventDefault();
-  const initialText = avatarSubmitButton.textContent;
-  renderLoading(avatarSubmitButton, true, initialText);
+  setSubmittingStatus(avatarForm, avatarSubmitButton, true);
   setUserAvatar(avatarInput.value)
     .then((userData) => {
       profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
@@ -202,14 +194,13 @@ const handleAvatarFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      renderLoading(avatarSubmitButton, false, initialText);
+      setSubmittingStatus(avatarForm, avatarSubmitButton, false);
     });
 };
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  const initialText = cardSubmitButton.textContent;
-  renderLoading(cardSubmitButton, true, initialText);
+  setSubmittingStatus(cardForm, cardSubmitButton, true);
   addNewCard({
     name: cardNameInput.value,
     link: cardLinkInput.value,
@@ -224,21 +215,19 @@ const handleCardFormSubmit = (evt) => {
           onInfoClick: handleInfoClick,
         })
       );
-      cardForm.reset();
       closeModalWindow(cardFormModalWindow);
     })
     .catch((err) => {
       console.log(err);
     })
     .finally(() => {
-      renderLoading(cardSubmitButton, false, initialText);
+      setSubmittingStatus(cardForm, cardSubmitButton, false);
     });
 };
 
 const handleRemoveCardFormSubmit = (evt) => {
   evt.preventDefault();
-  const initialText = removeCardSubmitButton.textContent;
-  renderLoading(removeCardSubmitButton, true, initialText);
+  setSubmittingStatus(removeCardForm, removeCardSubmitButton, true);
   removeCard(cardToRemove.id)
     .then(() => {
       deleteCard(cardToRemove.element);
@@ -249,8 +238,30 @@ const handleRemoveCardFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      renderLoading(removeCardSubmitButton, false, initialText);
+      setSubmittingStatus(removeCardForm, removeCardSubmitButton, false);
     });
+};
+
+// Показывает процесс сохранения: текст кнопки меняется здесь,
+// а активность управляется функциями модуля validation
+const setSubmittingStatus = (formElement, buttonElement, isLoading) => {
+  const initialText = buttonElement.dataset.initialText || buttonElement.textContent;
+  if (isLoading) {
+    buttonElement.dataset.initialText = buttonElement.textContent;
+    buttonElement.textContent = initialText === "Создать" ? "Создание..." : "Сохранение...";
+    // Блокировка кнопки средствами модуля validation
+    clearValidation(formElement, validationSettings);
+  } else {
+    buttonElement.textContent = initialText;
+    delete buttonElement.dataset.initialText;
+    // Возврат активности по актуальной валидности полей
+    const inputList = Array.from(
+      formElement.querySelectorAll(validationSettings.inputSelector)
+    );
+    inputList.forEach((inputElement) => {
+      inputElement.dispatchEvent(new Event("input"));
+    });
+  }
 };
 
 // Event listeners
