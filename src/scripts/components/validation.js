@@ -100,4 +100,6 @@ const enableValidation = (settings) => {
 export {
   enableValidation,
   clearValidation,
+  disableSubmitButton,
+  enableSubmitButton,
 };

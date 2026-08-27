@@ -18,7 +18,12 @@ import {
   closeModalWindow,
   setCloseModalWindowEventListeners,
 } from "./components/modal.js";
-import { enableValidation, clearValidation } from "./components/validation.js";
+import {
+  enableValidation,
+  clearValidation,
+  disableSubmitButton,
+  enableSubmitButton,
+} from "./components/validation.js";
 
 // Конфигурация валидации: селекторы и классы вынесены сюда,
 // чтобы validation.js не зависел от разметки
@@ -138,14 +143,14 @@ const handleInfoClick = (cardId) => {
     .then((cards) => {
       const cardData = cards.find((card) => card._id === cardId);
       cardInfoTitle.textContent = "Информация о карточке";
-      cardInfoModalInfoList.innerHTML = "";
+      cardInfoModalInfoList.replaceChildren();
       cardInfoModalInfoList.append(
         createInfoString("Описание:", cardData.name),
         createInfoString("Дата создания:", formatDate(new Date(cardData.createdAt))),
         createInfoString("Владелец:", cardData.owner.name),
         createInfoString("Количество лайков:", String(cardData.likes.length))
       );
-      cardInfoUsersList.innerHTML = "";
+      cardInfoUsersList.replaceChildren();
       if (cardData.likes.length === 0) {
         cardInfoText.textContent = "Пока никто не поставил лайк";
       } else {
@@ -161,10 +166,9 @@ const handleInfoClick = (cardId) => {
     });
 };
 
-
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-  setSubmittingStatus(profileForm, profileSubmitButton, true);
+  setSubmittingStatus(profileSubmitButton, true);
   setUserInfo({
     name: profileTitleInput.value,
     about: profileDescriptionInput.value,
@@ -178,13 +182,13 @@ const handleProfileFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      setSubmittingStatus(profileForm, profileSubmitButton, false);
+      setSubmittingStatus(profileSubmitButton, false);
     });
 };
 
 const handleAvatarFormSubmit = (evt) => {
   evt.preventDefault();
-  setSubmittingStatus(avatarForm, avatarSubmitButton, true);
+  setSubmittingStatus(avatarSubmitButton, true);
   setUserAvatar(avatarInput.value)
     .then((userData) => {
       profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
@@ -194,13 +198,13 @@ const handleAvatarFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      setSubmittingStatus(avatarForm, avatarSubmitButton, false);
+      setSubmittingStatus(avatarSubmitButton, false);
     });
 };
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  setSubmittingStatus(cardForm, cardSubmitButton, true);
+  setSubmittingStatus(cardSubmitButton, true, "Создание...");
   addNewCard({
     name: cardNameInput.value,
     link: cardLinkInput.value,
@@ -221,13 +225,13 @@ const handleCardFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      setSubmittingStatus(cardForm, cardSubmitButton, false);
+      setSubmittingStatus(cardSubmitButton, false);
     });
 };
 
 const handleRemoveCardFormSubmit = (evt) => {
   evt.preventDefault();
-  setSubmittingStatus(removeCardForm, removeCardSubmitButton, true);
+  setSubmittingStatus(removeCardSubmitButton, true, "Удаление...");
   removeCard(cardToRemove.id)
     .then(() => {
       deleteCard(cardToRemove.element);
@@ -238,29 +242,26 @@ const handleRemoveCardFormSubmit = (evt) => {
       console.log(err);
     })
     .finally(() => {
-      setSubmittingStatus(removeCardForm, removeCardSubmitButton, false);
+      setSubmittingStatus(removeCardSubmitButton, false);
     });
 };
 
-// Показывает процесс сохранения: текст кнопки меняется здесь,
-// а активность управляется функциями модуля validation
-const setSubmittingStatus = (formElement, buttonElement, isLoading) => {
+// Показывает процесс сохранения: меняет текст кнопки,
+// а активность кнопки управляется функциями модуля validation
+const setSubmittingStatus = (
+  buttonElement,
+  isLoading,
+  loadingText = "Сохранение..."
+) => {
   const initialText = buttonElement.dataset.initialText || buttonElement.textContent;
   if (isLoading) {
     buttonElement.dataset.initialText = buttonElement.textContent;
-    buttonElement.textContent = initialText === "Создать" ? "Создание..." : "Сохранение...";
-    // Блокировка кнопки средствами модуля validation
-    clearValidation(formElement, validationSettings);
+    buttonElement.textContent = loadingText;
+    disableSubmitButton(validationSettings, buttonElement);
   } else {
     buttonElement.textContent = initialText;
     delete buttonElement.dataset.initialText;
-    // Возврат активности по актуальной валидности полей
-    const inputList = Array.from(
-      formElement.querySelectorAll(validationSettings.inputSelector)
-    );
-    inputList.forEach((inputElement) => {
-      inputElement.dispatchEvent(new Event("input"));
-    });
+    enableSubmitButton(validationSettings, buttonElement);
   }
 };
 

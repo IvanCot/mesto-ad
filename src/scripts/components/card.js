@@ -38,12 +38,14 @@ export const createCardElement = (
   cardElement.querySelector(".card__title").textContent = data.name;
   cardElement.querySelector(".card__like-count").textContent = data.likes.length;
 
-  if (hasUserLike(data.likes, currentUserId)) {    likeButton.classList.add("card__like-button_is-active");
+  if (hasUserLike(data.likes, currentUserId)) {
+    likeButton.classList.add("card__like-button_is-active");
   }
 
-  if (data.owner._id !== currentUserId && onDeleteCard) {
+  const isOwner = data.owner._id === currentUserId;
+
+  if (!isOwner) {
     deleteButton.remove();
-    onDeleteCard = null;
   }
 
   if (onLikeIcon) {
@@ -52,7 +54,7 @@ export const createCardElement = (
     );
   }
 
-  if (onDeleteCard) {
+  if (isOwner && onDeleteCard) {
     deleteButton.addEventListener("click", () => onDeleteCard(cardElement, data));
   }
 
